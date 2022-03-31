@@ -25,6 +25,11 @@
 #include <string.h>
 #include <time.h>
 
+#ifndef USE_SHOX96
+#define USE_SHOX96 (0)
+#endif
+
+#if USE_SHOX96
 typedef unsigned char byte;
 
 unsigned int c_95[95] = { 16384, 16256, 15744, 16192, 15328, 15344, 15360, 16064, 15264, 15296, 15712, 15200, 14976, 15040, 14848, 15104, 14528, 14592, 14656, 14688, 14720, 14752, 14784, 14816, 14832, 14464, 15552, 15488, 15616, 15168, 15680, 16000, 15872, 10752, 8576, 8192, 8320, 9728, 8672, 8608, 8384, 11264, 9024, 8992, 12160, 8544, 11520, 11008, 8512, 9008, 12032, 11776, 10240, 8448, 8960, 8640, 9040, 8688, 9048, 15840, 16288, 15856, 16128, 16224, 16368, 40960, 6144, 0, 2048, 24576, 7680, 6656, 3072, 49152, 13312, 12800, 63488, 5632, 53248, 45056, 5120, 13056, 61440, 57344, 32768, 4096, 12288, 7168, 13568, 7936, 13696, 15776, 16320, 15808, 16352 };
@@ -45,7 +50,7 @@ byte lookup[65536];
 #define NICE_LEN_FOR_OTHER 12
 
 unsigned int mask[] = { 0x8000, 0xC000, 0xE000, 0xF000, 0xF800, 0xFC00, 0xFE00, 0xFF00 };
-int append_bits(char* out, int ol, unsigned int code, int clen, byte state)
+static int append_bits(char* out, int ol, unsigned int code, int clen, byte state)
 {
 
     byte cur_bit;
@@ -81,7 +86,7 @@ int append_bits(char* out, int ol, unsigned int code, int clen, byte state)
     return ol;
 }
 
-int encodeCount(char* out, int ol, int count)
+static int encodeCount(char* out, int ol, int count)
 {
     const byte codes[7] = { 0x01, 0x82, 0xC3, 0xE5, 0xED, 0xF5, 0xFD };
     const byte bit_len[7] = { 2, 5, 7, 9, 12, 16, 17 };
@@ -98,7 +103,7 @@ int encodeCount(char* out, int ol, int count)
     return ol;
 }
 
-int matchOccurance(const char* in, int len, int l, char* out, int* ol)
+static int matchOccurance(const char* in, int len, int l, char* out, int* ol)
 {
     int j, k;
     for (j = 0; j < l; j++) {
@@ -118,7 +123,7 @@ int matchOccurance(const char* in, int len, int l, char* out, int* ol)
     return -l;
 }
 
-int matchLine(const char* in, int len, int l, char* out, int* ol, struct lnk_lst* prev_lines)
+static int matchLine(const char* in, int len, int l, char* out, int* ol, struct lnk_lst* prev_lines)
 {
     int last_ol = *ol;
     int last_len = 0;
@@ -302,8 +307,10 @@ int shox96_0_2_compress(const char* in, int len, char* out, struct lnk_lst* prev
 // Decode lookup table for code index and length
 // First 2 bits 00, Next 3 bits indicate index of code from 0,
 // last 3 bits indicate code length in bits
-//                0,            1,            2,            3,            4,
-char vcode[32] = { 2 + (0 << 3), 3 + (3 << 3), 3 + (1 << 3), 4 + (6 << 3), 0,
+
+static char vcode[32] = {
+    //                0,            1,            2,            3,            4,
+    2 + (0 << 3), 3 + (3 << 3), 3 + (1 << 3), 4 + (6 << 3), 0,
     //                5,            6,            7,            8, 9, 10
     4 + (4 << 3), 3 + (2 << 3), 4 + (8 << 3), 0, 0, 0,
     //                11,          12, 13,            14, 15
@@ -311,37 +318,46 @@ char vcode[32] = { 2 + (0 << 3), 3 + (3 << 3), 3 + (1 << 3), 4 + (6 << 3), 0,
     //                16, 17, 18, 19, 20, 21, 22, 23
     0, 0, 0, 0, 0, 0, 0, 0,
     //                24, 25, 26, 27, 28, 29, 30, 31
-    0, 0, 0, 0, 0, 0, 0, 5 + (10 << 3) };
-//                0,            1,            2, 3,            4, 5, 6, 7,
-char hcode[32] = { 1 + (1 << 3), 2 + (0 << 3), 0, 3 + (2 << 3), 0, 0, 0, 5 + (3 << 3),
+    0, 0, 0, 0, 0, 0, 0, 5 + (10 << 3)
+};
+
+static char hcode[32] = {
+    //                0,            1,            2, 3,            4, 5, 6, 7,
+    1 + (1 << 3), 2 + (0 << 3), 0, 3 + (2 << 3), 0, 0, 0, 5 + (3 << 3),
     //                8, 9, 10, 11, 12, 13, 14, 15,
     0, 0, 0, 0, 0, 0, 0, 5 + (5 << 3),
     //                16, 17, 18, 19, 20, 21, 22, 23
     0, 0, 0, 0, 0, 0, 0, 5 + (4 << 3),
     //                24, 25, 26, 27, 28, 29, 30, 31
-    0, 0, 0, 0, 0, 0, 0, 5 + (6 << 3) };
+    0, 0, 0, 0, 0, 0, 0, 5 + (6 << 3)
+};
 
-enum { SHX_SET1 = 0,
+enum {
+    SHX_SET1 = 0,
     SHX_SET1A,
     SHX_SET1B,
     SHX_SET2,
     SHX_SET3,
     SHX_SET4,
-    SHX_SET4A };
-char sets[][11] = { { ' ', ' ', 'e', 't', 'a', 'o', 'i', 'n', 's', 'r', 'l' },
+    SHX_SET4A
+};
+
+static char sets[][11] = {
+    { ' ', ' ', 'e', 't', 'a', 'o', 'i', 'n', 's', 'r', 'l' },
     { 'c', 'd', 'h', 'u', 'p', 'm', 'b', 'g', 'w', 'f', 'y' },
     { 'v', 'k', 'q', 'j', 'x', 'z', ' ', ' ', ' ', ' ', ' ' },
     { ' ', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8' },
     { '.', ',', '-', '/', '=', '+', ' ', '(', ')', '$', '%' },
     { '&', ';', ':', '<', '>', '*', '"', '{', '}', '[', ']' },
-    { '@', '?', '\'', '^', '#', '_', '!', '\\', '|', '~', '`' } };
+    { '@', '?', '\'', '^', '#', '_', '!', '\\', '|', '~', '`' }
+};
 
-int getBitVal(const char* in, int bit_no, int count)
+static int getBitVal(const char* in, int bit_no, int count)
 {
     return (in[bit_no >> 3] & (0x80 >> (bit_no % 8)) ? 1 << count : 0);
 }
 
-int getCodeIdx(char* code_type, const char* in, int len, int* bit_no_p)
+static int getCodeIdx(char* code_type, const char* in, int len, int* bit_no_p)
 {
     int code = 0;
     int count = 0;
@@ -358,7 +374,7 @@ int getCodeIdx(char* code_type, const char* in, int len, int* bit_no_p)
     return 1; // skip if code not found
 }
 
-int getNumFromBits(const char* in, int bit_no, int count)
+static int getNumFromBits(const char* in, int bit_no, int count)
 {
     int ret = 0;
     while (count--) {
@@ -367,7 +383,7 @@ int getNumFromBits(const char* in, int bit_no, int count)
     return ret;
 }
 
-int readCount(const char* in, int* bit_no_p, int len)
+static int readCount(const char* in, int* bit_no_p, int len)
 {
     const byte bit_len[7] = { 5, 2, 7, 9, 12, 16, 17 };
     const uint16_t adder[7] = { 4, 0, 36, 164, 676, 4772, 0 };
@@ -501,3 +517,5 @@ int shox96_0_2_decompress(const char* in, int len, char* out, struct lnk_lst* pr
 
     return ol;
 }
+
+#endif /* USE_SHOX96 */

@@ -11,7 +11,7 @@ idf_component_register(
 )
 
 set_source_files_properties(
-    ${SOURCES}
+    "src/sqlite3.c"
     PROPERTIES COMPILE_FLAGS "-w -Os"
 )
 

@@ -16,14 +16,15 @@
  * @author Arundale R.
  *
  */
-#ifndef shox96_0_2_0
-#define shox96_0_2_0
+#ifndef SHOX96_0_2_H
+#define SHOX96_0_2_H
 
 struct lnk_lst {
-  char *data;
-  struct lnk_lst *previous;
+    char* data;
+    struct lnk_lst* previous;
 };
 
-extern int shox96_0_2_compress(const char *in, int len, char *out, struct lnk_lst *prev_lines);
-extern int shox96_0_2_decompress(const char *in, int len, char *out, struct lnk_lst *prev_lines);
-#endif
+int shox96_0_2_compress(const char* in, int len, char* out, struct lnk_lst* prev_lines);
+int shox96_0_2_decompress(const char* in, int len, char* out, struct lnk_lst* prev_lines);
+
+#endif /* SHOX96_0_2_H */
