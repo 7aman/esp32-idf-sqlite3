@@ -1,4 +1,3 @@
-
 /*
 ** 2001-09-15
 **
@@ -33,9 +32,6 @@
 */
 #ifndef SQLITE3_H
 #define SQLITE3_H
-
-#include "config_ext.h" /* Not in original Amalgamation version */
-
 #include <stdarg.h>     /* Needed for the definition of va_list */
 
 /*
