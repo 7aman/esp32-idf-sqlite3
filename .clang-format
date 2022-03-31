@@ -1,0 +1,9 @@
+---
+Language: Cpp
+BasedOnStyle: WebKit
+Standard: Cpp11
+TabWidth: 4
+UseTab: Never
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments 
+...
+

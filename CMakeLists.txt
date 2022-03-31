@@ -8,7 +8,6 @@ idf_component_register(
     SRCS ${SOURCES}
     INCLUDE_DIRS "include"
     PRIV_INCLUDE_DIRS "private_include"
-    PRIV_REQUIRES spi_flash
 )
 
 set_source_files_properties(
