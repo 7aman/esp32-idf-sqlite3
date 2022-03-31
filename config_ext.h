@@ -1,4 +1,3 @@
-#define BUILD_sqlite -DNDEBUG
 #define SQLITE_CORE                          1
 #define SQLITE_NO_SYNC                       1
 #define YYSTACKDEPTH                        20
